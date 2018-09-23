@@ -4,6 +4,7 @@
 <head>
   <title>Example of the Authorization Code flow with Spotify</title>
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
   <style type="text/css">
     #login,
     #loggedin {
@@ -33,7 +34,7 @@
       <div id="currentsong">
       </div>
       <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
-      <button id=CurrentSong class="btn btn-primary">Get current song </button>
+      <button  id=CurrentSong class="btn btn-primary">Get current song </button>
     </div>
   </div>
   </div>
@@ -71,8 +72,10 @@
   <script id="currentSong-template" type="text/x-handlebars-template">
         <h2>Current Playing Song</h2>
         <dl class="dl-horizontal">
-        <dt>Title</dt> <dd class="text-overflow">{{songTitle}}</dd>
-        <dt>Artist</dt><dd class="text-overflow">{{songArtist}}</dd>
+        <dt>Title</dt><dd class="text-overflow">{{songTitle}}</dd>
+        <dt>Artist</dt>
+        <dd class="text-overflow">{{songArtist}}</dd>
+        <dd><img src="{{albumImage}}"></dd>
       </dl>
 
     </script>
@@ -168,11 +171,13 @@
               console.log(response);
               var title = response.item.name;
               var artist = response.item.artists[0].name;
-              console.log(title + ' ' + artist);
+              var imageURL = response.item.album.images[1].url;
+              console.log(imageURL);
 
               var context = {
                 songTitle: title,
-                songArtist: artist
+                songArtist: artist,
+                albumImage: imageURL
               };
 
               currentSongPlaceholder.innerHTML = currentSongTemplate(context);
