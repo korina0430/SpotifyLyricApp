@@ -168,9 +168,11 @@
           var lyricsTemplate = Handlebars.compile(lyricsSource);
           var lyricsPlaceholder = document.getElementById('lyrics');
           var apiKey = 'wNLloE958Jown73EaP8pQpGZeZHPjYndlMsyUF37564nkWtqRC1IP6IdgqJSS4Qn';
-
+          var url ='https://orion.apiseeds.com/api/music/lyric/' + artist + '/' + title + '?apikey=' + apiKey;
+          url= url.replace('/%20/g', " ");
+          console.log(url);
             $.ajax({
-            url: 'https://orion.apiseeds.com/api/music/lyric/' + artist + '/' + title + '?apikey=' + apiKey,
+            url: encodeURI(url),
             type: "GET",
             beforeSend: function (header) { header.setRequestHeader('Authorization', 'Bearer ' + access_token); },
             success: function (response) {
