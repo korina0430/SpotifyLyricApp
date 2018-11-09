@@ -11,6 +11,17 @@
       display: none;
     }
 
+    #lyrics {
+      width:600px;
+      height: auto;
+      float:right;
+    }
+    #currentsong {
+      width: 200px;
+      height: auto;
+      float: left;
+    }
+
     .text-overflow {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -31,11 +42,13 @@
       </div>
       <div id="oauth">
       </div>
+      <button  id=CurrentSong class="btn btn-primary">Get current song </button>
+
       <div id="currentsong">
       </div>
       <div id="lyrics"></div>
-      <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
-      <button  id=CurrentSong class="btn btn-primary">Get current song </button>
+
+      <!--<button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button> -->
     </div>
   </div>
   </div>
@@ -48,12 +61,14 @@
         </div>
         <div class="media-body">
           <dl class="dl-horizontal">
-            <dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
-            <dt>Id</dt><dd>{{id}}</dd>
+            <!--<dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
+            -->
+              <dt>Id</dt><dd>{{id}}</dd>
             <dt>Email</dt><dd>{{email}}</dd>
-            <dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
+            <!--<dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
             <dt>Link</dt><dd><a href="{{href}}">{{href}}</a></dd>
             <dt>Profile Image</dt><dd class="clearfix"><a href="{{images.0.url}}">{{images.0.url}}</a></dd>
+            -->
             <dt>Country</dt><dd>{{country}}</dd>
           </dl>
         </div>
@@ -147,7 +162,7 @@
           $('#getCurrentSong').hide();
         }
 
-        document.getElementById('obtain-new-token').addEventListener('click', function () {
+       /*document.getElementById('obtain-new-token').addEventListener('click', function () {
           $.ajax({
             url: '/refresh_token',
             data: {
@@ -160,7 +175,35 @@
               refresh_token: refresh_token
             });
           });
-        }, false);
+        }, false); */
+
+        function clearLyrics()
+        {
+          var lyricsSource = document.getElementById("lyrics-template").innerHTML;
+          var lyricsTemplate = Handlebars.compile(lyricsSource);
+          var lyricsPlaceholder = document.getElementById('lyrics');
+           // reset lyrics
+           var context = {
+                lyrics: ""
+              };
+
+          lyricsPlaceholder.innerHTML = lyricsTemplate(context);
+        }
+
+        function lyricsError(artist, title) {
+          var lyricsSource = document.getElementById("lyrics-template").innerHTML;
+          var lyricsTemplate = Handlebars.compile(lyricsSource);
+          var lyricsPlaceholder = document.getElementById('lyrics');
+
+          var error = "Sorry, we couldn't find lyrics for " + title + " by " + artist + ".";
+
+          var context = {
+            lyrics: error
+          };
+
+          lyricsPlaceholder.innerHTML = lyricsTemplate(context);
+
+        }
 
         function displayLyrics(artist, title)
         {
@@ -170,13 +213,14 @@
           var apiKey = 'wNLloE958Jown73EaP8pQpGZeZHPjYndlMsyUF37564nkWtqRC1IP6IdgqJSS4Qn';
           var url ='https://orion.apiseeds.com/api/music/lyric/' + artist + '/' + title + '?apikey=' + apiKey;
           url= url.replace('/%20/g', " ");
+
           console.log(url);
             $.ajax({
             url: encodeURI(url),
             type: "GET",
             beforeSend: function (header) { header.setRequestHeader('Authorization', 'Bearer ' + access_token); },
             success: function (response) {
-              console.log(response);
+              console.log('lryics response: ' + response);
               var songlyrics = response.result.track.text;
 
               var context = {
@@ -185,6 +229,11 @@
 
               lyricsPlaceholder.innerHTML = lyricsTemplate(context);
 
+            },
+            error: function(response)
+            {
+              console.log("lyrics error :( ");
+              lyricsError(artist,title);
             }
           });
 
@@ -195,17 +244,17 @@
           var currentSongSource = document.getElementById("currentSong-template").innerHTML;
           var currentSongTemplate = Handlebars.compile(currentSongSource);
           var currentSongPlaceholder = document.getElementById('currentsong');
-
+          clearLyrics();
           $.ajax({
             url: 'https://api.spotify.com/v1/me/player/currently-playing',
             type: "GET",
             beforeSend: function (header) { header.setRequestHeader('Authorization', 'Bearer ' + access_token); },
             success: function (response) {
-              console.log(response);
+
+              console.log('response ' + response);
               var title = response.item.name;
               var artist = response.item.artists[0].name;
               var imageURL = response.item.album.images[1].url;
-              console.log(imageURL);
 
               var context = {
                 songTitle: title,
