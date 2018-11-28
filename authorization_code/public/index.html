@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Example of the Authorization Code flow with Spotify</title>
+  <title>Spotify Lyric App</title>
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 
   <style type="text/css">
@@ -12,7 +12,7 @@
     }
 
     #lyrics {
-      width:600px;
+      width:400px;
       height: auto;
       float:right;
     }
@@ -23,7 +23,6 @@
     }
 
     .text-overflow {
-      overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       width: 500px;
@@ -34,7 +33,7 @@
 <body>
   <div class="container">
     <div id="login">
-      <h1>This is an example of the Authorization Code flow</h1>
+      <h1>Spotify Lyric App </h1>
       <a href="/login" class="btn btn-primary">Log in with Spotify</a>
     </div>
     <div id="loggedin">
@@ -99,6 +98,14 @@
       <h2>Lyrics</h2>
       <pre>{{lyrics}}</pre>
     </script>
+
+    <h1>Click a song to see it's lyrics!</h1>
+    <table id="songs">
+      <tr>
+        <th>Artist</th>
+        <th>Title</th>
+      </tr>
+    </table>
 
   <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
   <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
@@ -182,6 +189,7 @@
           var lyricsSource = document.getElementById("lyrics-template").innerHTML;
           var lyricsTemplate = Handlebars.compile(lyricsSource);
           var lyricsPlaceholder = document.getElementById('lyrics');
+          addSongToList();
            // reset lyrics
            var context = {
                 lyrics: ""
@@ -210,17 +218,22 @@
           var lyricsSource = document.getElementById("lyrics-template").innerHTML;
           var lyricsTemplate = Handlebars.compile(lyricsSource);
           var lyricsPlaceholder = document.getElementById('lyrics');
+
+          // Needed if lyrics generated from table
+          var currentSongSource = document.getElementById("currentSong-template").innerHTML;
+          var currentSongTemplate = Handlebars.compile(currentSongSource);
+          var currentSongPlaceholder = document.getElementById('currentsong');
+
           var apiKey = 'wNLloE958Jown73EaP8pQpGZeZHPjYndlMsyUF37564nkWtqRC1IP6IdgqJSS4Qn';
           var url ='https://orion.apiseeds.com/api/music/lyric/' + artist + '/' + title + '?apikey=' + apiKey;
           url= url.replace('/%20/g', " ");
+          console.log('Trying to display lyrics for : '+ artist + ' ' + title);
 
-          console.log(url);
-            $.ajax({
+          $.ajax({
             url: encodeURI(url),
             type: "GET",
             beforeSend: function (header) { header.setRequestHeader('Authorization', 'Bearer ' + access_token); },
             success: function (response) {
-              console.log('lryics response: ' + response);
               var songlyrics = response.result.track.text;
 
               var context = {
@@ -228,23 +241,56 @@
               };
 
               lyricsPlaceholder.innerHTML = lyricsTemplate(context);
-
             },
             error: function(response)
             {
-              console.log("lyrics error :( ");
+              console.log("lyrics error");
               lyricsError(artist,title);
             }
           });
-
         }
 
-        document.getElementById('CurrentSong').addEventListener('click', function () {
+        function addSongToList(artist, title)
+        {
+          console.log(artist, typeof(artist))
+          if (artist != undefined && title != undefined)
+          {
+          var table = document.getElementById("songs");
+          var row = table.insertRow(table.rows.length);
+          var cell1=row.insertCell(0);
+          cell1.innerHTML = artist;
+          cell1.onclick = function(){updateDisplayFromTable(artist,title);};
+          var cell2 = row.insertCell(1);
+          cell2.innerHTML = title;
+          cell2.onclick = function(){updateDisplayFromTable(artist,title);};
 
+          }
+        }
+
+        function updateDisplayFromTable(artist, title)
+        {
           var currentSongSource = document.getElementById("currentSong-template").innerHTML;
           var currentSongTemplate = Handlebars.compile(currentSongSource);
           var currentSongPlaceholder = document.getElementById('currentsong');
-          clearLyrics();
+
+          displayLyrics(artist, title);
+          var context = {
+                songTitle: title,
+                songArtist: artist,
+                albumImage: null
+              };
+
+              currentSongPlaceholder.innerHTML = currentSongTemplate(context);
+
+        }
+
+        function updateCurrentSongDisplay()
+        {
+          var currentSongSource = document.getElementById("currentSong-template").innerHTML;
+          var currentSongTemplate = Handlebars.compile(currentSongSource);
+          var currentSongPlaceholder = document.getElementById('currentsong');
+          //clearLyrics();
+
           $.ajax({
             url: 'https://api.spotify.com/v1/me/player/currently-playing',
             type: "GET",
@@ -264,13 +310,19 @@
 
               currentSongPlaceholder.innerHTML = currentSongTemplate(context);
               displayLyrics(artist,title);
+              addSongToList(artist,title);
             }
           });
+        }
+
+        document.getElementById('CurrentSong').addEventListener('click', function () {
+          clearLyrics();
+          updateCurrentSongDisplay();
+
         });
       }
     })();
   </script>
 
 </body>
-<!-- TODO: If getCurrentSong == undefined-->
 </html>
