@@ -6,6 +6,21 @@
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 
   <style type="text/css">
+    body {
+      background-color:black;
+      color: white;
+    }
+    .btn, .btn-primary, .btn-primary {
+      background-color: seagreen !important;
+      border-color: seagreen !important;
+    }
+
+
+    .btn-primary:hover {
+      background-color: mediumspringgreen;
+      border-color: mediumspringgreen;
+      color: black;
+    }
     #login,
     #loggedin {
       display: none;
@@ -16,10 +31,38 @@
       height: auto;
       float:right;
     }
+
     #currentsong {
       width: 200px;
       height: auto;
       float: left;
+    }
+
+    #tableLabel {
+      font-size: 20px;
+      width: 500px;
+    }
+
+    #lyricsTable {
+      bottom: 0;
+      position: absolute;
+      padding-left: 10px;
+      padding-bottom: 10px;
+    }
+
+    #songs {
+      width:300px;
+    }
+
+    #lyricsText {
+      background-color: black ;
+      color:mediumseagreen;
+    }
+
+    .clickable {
+      color: mediumspringgreen;
+      text-decoration: underline;
+      cursor: pointer;
     }
 
     .text-overflow {
@@ -27,6 +70,8 @@
       white-space: nowrap;
       width: 500px;
     }
+
+
   </style>
 </head>
 
@@ -94,18 +139,19 @@
       </dl>
     </script>
 
+    <div id = lyricsTable>
+    <h1 id="tableLabel">Song History! Click a song to see it's lyrics!</h1>
+    <table id="songs">
+    <tr>
+      <th id="artistCol">Artist</th>
+      <th id="songCol">Title</th>
+    </tr>
+  </table>
+</div>
     <script id="lyrics-template" type="text/x-handlebars-template">
       <h2>Lyrics</h2>
-      <pre>{{lyrics}}</pre>
+      <pre id="lyricsText">{{lyrics}}</pre>
     </script>
-
-    <h1>Click a song to see it's lyrics!</h1>
-    <table id="songs">
-      <tr>
-        <th>Artist</th>
-        <th>Title</th>
-      </tr>
-    </table>
 
   <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
   <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
@@ -257,12 +303,16 @@
           {
           var table = document.getElementById("songs");
           var row = table.insertRow(table.rows.length);
+
           var cell1=row.insertCell(0);
           cell1.innerHTML = artist;
           cell1.onclick = function(){updateDisplayFromTable(artist,title);};
+          cell1.setAttribute("class", "clickable");
+
           var cell2 = row.insertCell(1);
           cell2.innerHTML = title;
           cell2.onclick = function(){updateDisplayFromTable(artist,title);};
+          cell2.setAttribute("class", "clickable");
 
           }
         }
